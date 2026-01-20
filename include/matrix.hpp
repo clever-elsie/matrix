@@ -31,6 +31,7 @@
 #include "./detail/operator/matrix_addsub.hpp"
 #include "./detail/operator/matrix_mulpow.hpp"
 #include "./detail/operator/reduction.hpp"
+#include "./detail/io.hpp"
 #else
 namespace elsie{
 
