@@ -1,4 +1,6 @@
-// Copyright (c) Elsie
+// MIT License
+// Copyright 2026 CleverElsie
+
 // AVX2 / AVX512 を用いた double 行列の高速 FMA 実装
 // C += A * B をブロック分割 + SIMD で計算する。
 //   ブロック: 64x64x64（キャッシュ効率を狙った素直な分割）

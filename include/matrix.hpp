@@ -1,3 +1,6 @@
+// MIT License
+// Copyright 2026 CleverElsie
+
 #ifndef ELSIE_MATRIX
 #define ELSIE_MATRIX
 #include <cassert>
