@@ -59,8 +59,6 @@ matrix<T>& matrix<T>::fma_impl_strassen(const matrix<U>&a,const matrix<V>&b){
   [[assume(dim().row==a.dim().row)]];
   [[assume(dim().col==b.dim().col)]];
   [[assume(a.dim().col==b.dim().row)]];
-  const auto[row,col]=dim();
-  const size_t midCR=a.dim().col;
   std::array<matrix<U>,4>as=a.split();
   std::array<matrix<V>,4>bs=b.split();
   matrix<U> s2=as[0]+as[1], s9=as[0]-as[2], s5=as[0]+as[3], s3=as[2]+as[3], s7=as[1]-as[3];
@@ -87,14 +85,12 @@ matrix<T>& matrix<T>::fma(const matrix<U>&a,const matrix<V>&b){
   const auto[row,col]=dim();
   const size_t midCR=a.dim().col;
   constexpr const size_t block_size=64;
-  constexpr const size_t strassen_threshold=256;
+  constexpr const size_t strassen_threshold=512;
   const size_t min=std::min<size_t>({row,col,midCR});
   if(min<block_size) return fma_impl_naive(a,b);
-  else return fma_impl_blocked(a,b);
-  /*
+  //else return fma_impl_blocked(a,b);
   else if(min<strassen_threshold) return fma_impl_blocked(a,b);
   else return fma_impl_strassen(a,b);
-  */
 }
 
 template<class T>

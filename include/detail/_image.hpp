@@ -13,31 +13,6 @@
 
 namespace elsie{
 
-namespace matrix_io{
-  template<class T>
-  concept Writable=requires(const T&x, char (&buf)[128]){
-    {x.write(buf)}->std::convertible_to<std::pair<char*,size_t>>;
-  };
-  template<class T>
-  concept modint_v=requires{
-    requires std::integral<typename T::value_type>;
-    { T::is_modint }->std::convertible_to<bool>;
-  } && T::is_modint;
-  template<class T>
-  concept raw_constructible=requires{
-    { T::raw(0) }->std::convertible_to<T>;
-    { T::raw(0LL) }->std::convertible_to<T>;
-  };
-  template<class Char, class Traits, class T>
-  concept istreamable=requires(std::basic_istream<Char, Traits>& is, T&x){
-    {is>>x}->std::convertible_to<std::basic_istream<Char, Traits>&>;
-  };
-  template<class Char, class Traits, class T>
-  concept ostreamable=requires(std::basic_ostream<Char, Traits>& os, const T&x){
-    {os<<x}->std::convertible_to<std::basic_ostream<Char, Traits>&>;
-  };
-};
-
 // コピーコンストラクタ，コピー代入はviewの作成
 // moveは所有権を持っていればmove，viewの場合は単にコピーしてコピー元のviewを無効化
 // deep copyは.copy()を使う
@@ -66,6 +41,9 @@ class matrix{
   static size_t calc_capacity_data(size_t capacity, bool is_view=false){
     return (capacity<<1) | (is_view?1:0);
   }
+  static size_t ceil_to_alignment(size_t n){
+    return std::bit_ceil((n+63)&~63);
+  }
   size_t get_capacity()const{ return capacity_data>>1; }
   bool is_view()const{ return capacity_data&1; }
 
@@ -88,9 +66,13 @@ class matrix{
   matrix<T> copy(size_t row, size_t col, size_t row_offset, size_t col_offset)const;
   private:
   static T* allocate(size_t n){
+    // アライメントはAVX512に対応するように64byte
+    return new (std::align_val_t(64)) T[n];
+    /*
     if constexpr (alignof(T)<=__STDCPP_DEFAULT_NEW_ALIGNMENT__)
       return static_cast<T*>(::operator new(n*sizeof(T)));
     else return static_cast<T*>(::operator new(n*sizeof(T), std::align_val_t(alignof(T))));
+    */
   }
   static void default_construct(T*p,size_t n,T init=T()){
     if constexpr(false==std::is_trivially_default_constructible_v<T>)
@@ -98,9 +80,12 @@ class matrix{
         ::new (static_cast<void*>(p+i)) T(init);
   }
   static void free(T*p){
+    delete [] p;
+    /*
     if constexpr (alignof(T)<=__STDCPP_DEFAULT_NEW_ALIGNMENT__)
       ::operator delete(p);
     else ::operator delete(p, std::align_val_t(alignof(T)));
+    */
   }
   public:
 
@@ -177,9 +162,7 @@ class matrix{
   template<class Char, class Traits, class U>
   friend std::basic_ostream<Char, Traits>& operator<<(std::basic_ostream<Char, Traits>& os, const matrix<U>& mat);
   template<class Char, class Traits>
-  void read(std::basic_istream<Char, Traits>& is) requires (!matrix_io::modint_v<T>);
-  template<bool validated=true,class Char, class Traits>
-  void read(std::basic_istream<Char, Traits>& is) requires (matrix_io::modint_v<T>);
+  void read(std::basic_istream<Char, Traits>& is);
 };
 
 } // namespace elsie

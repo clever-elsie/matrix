@@ -11,16 +11,16 @@ matrix<T>::matrix():dim_(),leading_(),capacity_data(0),data_(nullptr){}
 
 template<class T>
 matrix<T>::matrix(const dimension&dim)
-  :dim_(dim),leading_(dim)
-  ,capacity_data(calc_capacity_data(dim.capacity()))
+  :dim_(dim),leading_(ceil_to_alignment(dim.row),ceil_to_alignment(dim.col))
+  ,capacity_data(calc_capacity_data(leading_.capacity()))
   ,data_(allocate(get_capacity())){
   default_construct(data_,get_capacity());
 }
 
 template<class T>
 matrix<T>::matrix(const dimension&dim, const T& init)
-  :dim_(dim),leading_(dim)
-  ,capacity_data(calc_capacity_data(dim.capacity()))
+  :dim_(dim),leading_(ceil_to_alignment(dim.row),ceil_to_alignment(dim.col))
+  ,capacity_data(calc_capacity_data(leading_.capacity()))
   ,data_(allocate(get_capacity())
 ){
   default_construct(data_,get_capacity(),init);
@@ -65,6 +65,7 @@ matrix<T>& matrix<T>::operator=(matrix<T>&& other){
   leading_=other.leading_;
   capacity_data=other.capacity_data;
   data_=other.data_;
+  return *this;
 }
 
 template<class T>
