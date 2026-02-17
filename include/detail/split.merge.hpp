@@ -1,3 +1,6 @@
+// MIT License
+// Copyright 2026 CleverElsie
+
 #ifndef ELSIE_MATRIX_SPLIT_MERGE_HPP
 #define ELSIE_MATRIX_SPLIT_MERGE_HPP
 
